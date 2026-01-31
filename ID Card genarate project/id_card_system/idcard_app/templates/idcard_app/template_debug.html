@@ -1,0 +1,422 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Template Debug & Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        h1 {
+            color: #2563eb;
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #1e40af;
+            margin-top: 30px;
+        }
+        .section {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2563eb;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+        .btn-success {
+            background: #22c55e;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #16a34a;
+        }
+        .output {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .success {
+            color: #22c55e;
+        }
+        .error {
+            color: #ef4444;
+        }
+        .info {
+            color: #38bdf8;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #e5e7eb;
+            font-weight: bold;
+        }
+        tr:hover {
+            background: #f3f4f6;
+        }
+        .json-display {
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 11px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🔍 Template System Debug & Test</h1>
+    
+    <!-- Check Saved Templates -->
+    <div class="section">
+        <h2>1️⃣ Check Saved Templates</h2>
+        <p>Click to fetch all saved templates from the database</p>
+        <button class="btn btn-primary" onclick="checkSavedTemplates()">Check Templates</button>
+        <div id="savedOutput" class="output"></div>
+    </div>
+
+    <!-- Load Templates for Generate Page -->
+    <div class="section">
+        <h2>2️⃣ Load Templates (Generate ID API)</h2>
+        <p>Click to test the /admin/generate-id/api/templates/ endpoint</p>
+        <button class="btn btn-primary" onclick="loadGenerateTemplates()">Load Templates</button>
+        <div id="generateOutput" class="output"></div>
+    </div>
+
+    <!-- Load Single Template -->
+    <div class="section">
+        <h2>3️⃣ Load Single Template Details</h2>
+        <p>Enter template ID and click to load its details</p>
+        <input type="number" id="templateId" placeholder="Enter template ID" style="padding: 8px; margin-right: 10px;">
+        <button class="btn btn-primary" onclick="loadSingleTemplate()">Load Template</button>
+        <div id="singleOutput" class="output"></div>
+    </div>
+
+    <!-- Test Template Creation -->
+    <div class="section">
+        <h2>4️⃣ Test Template Creation</h2>
+        <p>Create a simple test template to verify saving works</p>
+        <input type="text" id="templateName" placeholder="Enter template name" style="padding: 8px; margin-right: 10px;" value="Test Template">
+        <button class="btn btn-success" onclick="createTestTemplate()">Create Test Template</button>
+        <div id="createOutput" class="output"></div>
+    </div>
+
+    <!-- Templates List Table -->
+    <div class="section">
+        <h2>5️⃣ All Templates List</h2>
+        <button class="btn btn-primary" onclick="listTemplatesTable()">Refresh List</button>
+        <div id="tableOutput"></div>
+    </div>
+
+    <!-- Template Contents Viewer -->
+    <div class="section">
+        <h2>6️⃣ View Template Content (JSON)</h2>
+        <input type="number" id="viewTemplateId" placeholder="Enter template ID" style="padding: 8px; margin-right: 10px;">
+        <button class="btn btn-primary" onclick="viewTemplateContent()">View Content</button>
+        <div id="contentOutput"></div>
+    </div>
+</div>
+
+<script>
+const API_BASE = '/admin/generate-id/api/templates/';
+const DEBUG_BASE = '/admin/generate-id/debug/';
+
+// Clear output
+function clearOutput(id) {
+    document.getElementById(id).innerHTML = '';
+}
+
+// Log to output
+function log(id, message, type = 'info') {
+    const output = document.getElementById(id);
+    const timestamp = new Date().toLocaleTimeString();
+    let color = 'white';
+    if (type === 'success') color = '#22c55e';
+    if (type === 'error') color = '#ef4444';
+    if (type === 'info') color = '#38bdf8';
+    
+    output.innerHTML += `<span style="color: ${color};">[${timestamp}] ${message}</span>\n`;
+    output.scrollTop = output.scrollHeight;
+}
+
+// 1. Check Saved Templates (Debug endpoint)
+async function checkSavedTemplates() {
+    clearOutput('savedOutput');
+    log('savedOutput', 'Fetching saved templates...');
+    
+    try {
+        const response = await fetch(DEBUG_BASE);
+        const data = await response.json();
+        
+        if (response.ok) {
+            log('savedOutput', `✅ Found ${data.total_templates} template(s)`, 'success');
+            log('savedOutput', '');
+            
+            if (data.total_templates === 0) {
+                log('savedOutput', '⚠️  No templates saved yet', 'error');
+                log('savedOutput', 'Create templates in the template editor first!');
+            } else {
+                data.templates.forEach((t, i) => {
+                    log('savedOutput', `Template ${i+1}:`, 'info');
+                    log('savedOutput', `  ID: ${t.id}`);
+                    log('savedOutput', `  Name: ${t.name}`);
+                    log('savedOutput', `  Created: ${t.created_at}`);
+                    log('savedOutput', `  Has Front: ${t.has_front}`);
+                    log('savedOutput', `  Has Back: ${t.has_back}`);
+                });
+            }
+        } else {
+            log('savedOutput', `❌ Error: ${data.error}`, 'error');
+        }
+    } catch (error) {
+        log('savedOutput', `❌ Fetch Error: ${error.message}`, 'error');
+    }
+}
+
+// 2. Load Templates for Generate Page
+async function loadGenerateTemplates() {
+    clearOutput('generateOutput');
+    log('generateOutput', 'Fetching templates from API...');
+    
+    try {
+        const response = await fetch(API_BASE);
+        const data = await response.json();
+        
+        if (response.ok) {
+            log('generateOutput', `✅ Loaded ${data.templates.length} template(s)`, 'success');
+            log('generateOutput', '');
+            
+            data.templates.forEach((t, i) => {
+                log('generateOutput', `Template ${i+1}:`, 'info');
+                log('generateOutput', `  ID: ${t.id}`);
+                log('generateOutput', `  Name: ${t.name}`);
+                log('generateOutput', `  Created: ${t.created_at}`);
+            });
+        } else {
+            log('generateOutput', `❌ Error loading templates`, 'error');
+        }
+    } catch (error) {
+        log('generateOutput', `❌ Fetch Error: ${error.message}`, 'error');
+    }
+}
+
+// 3. Load Single Template
+async function loadSingleTemplate() {
+    const templateId = document.getElementById('templateId').value;
+    
+    if (!templateId) {
+        alert('Please enter a template ID');
+        return;
+    }
+    
+    clearOutput('singleOutput');
+    log('singleOutput', `Fetching template ${templateId}...`);
+    
+    try {
+        const response = await fetch(`${API_BASE}${templateId}/`);
+        const data = await response.json();
+        
+        if (response.ok) {
+            log('singleOutput', `✅ Template loaded successfully`, 'success');
+            log('singleOutput', `ID: ${data.id}`);
+            log('singleOutput', `Name: ${data.name}`);
+            log('singleOutput', `Created: ${data.created_at}`);
+            log('singleOutput', '');
+            log('singleOutput', 'Template JSON:');
+            log('singleOutput', JSON.stringify(data.json, null, 2));
+        } else {
+            log('singleOutput', `❌ Error: ${data.error}`, 'error');
+        }
+    } catch (error) {
+        log('singleOutput', `❌ Fetch Error: ${error.message}`, 'error');
+    }
+}
+
+// 4. Create Test Template
+async function createTestTemplate() {
+    const name = document.getElementById('templateName').value || 'Test Template';
+    clearOutput('createOutput');
+    log('createOutput', `Creating template: "${name}"...`);
+    
+    const testTemplate = {
+        name: name,
+        template: {
+            front: [
+                {id: 1, type: 'rect', x: 320, y: 30, w: 640, h: 60, fill: '#2563eb'},
+                {id: 2, type: 'text', x: 320, y: 50, text: name.toUpperCase(), size: 20, color: '#fff', font: 'Arial'},
+                {id: 3, type: 'text', x: 100, y: 150, text: 'Name: {name}', size: 14, color: '#000'},
+                {id: 4, type: 'text', x: 100, y: 180, text: 'Email: {email}', size: 12, color: '#000'},
+                {id: 5, type: 'text', x: 100, y: 210, text: 'Role: {role}', size: 12, color: '#000'},
+            ],
+            back: [
+                {id: 1, type: 'rect', x: 320, y: 200, w: 640, h: 200, fill: '#e5e7eb'},
+                {id: 2, type: 'text', x: 320, y: 250, text: 'Back Side Content', size: 14, color: '#000'},
+            ],
+            bg: '#ffffff',
+            width: 640,
+            height: 400
+        }
+    };
+    
+    try {
+        const response = await fetch('/save-template/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(testTemplate)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            log('createOutput', `✅ Template created successfully!`, 'success');
+            log('createOutput', `ID: ${data.id}`);
+            log('createOutput', 'You can now see it in the template list above ⬆️');
+        } else {
+            log('createOutput', `❌ Error: ${data.error || 'Unknown error'}`, 'error');
+        }
+    } catch (error) {
+        log('createOutput', `❌ Fetch Error: ${error.message}`, 'error');
+    }
+}
+
+// 5. List Templates in Table
+async function listTemplatesTable() {
+    const tableOutput = document.getElementById('tableOutput');
+    tableOutput.innerHTML = '<p>Loading...</p>';
+    
+    try {
+        const response = await fetch(DEBUG_BASE);
+        const data = await response.json();
+        
+        if (data.templates.length === 0) {
+            tableOutput.innerHTML = '<p style="color: #ef4444;">❌ No templates found</p>';
+            return;
+        }
+        
+        let html = '<table><tr><th>ID</th><th>Name</th><th>Created</th><th>Has Front</th><th>Has Back</th><th>Actions</th></tr>';
+        
+        data.templates.forEach(t => {
+            html += `<tr>
+                <td>${t.id}</td>
+                <td>${t.name}</td>
+                <td>${new Date(t.created_at).toLocaleString()}</td>
+                <td>${t.has_front ? '✅' : '❌'}</td>
+                <td>${t.has_back ? '✅' : '❌'}</td>
+                <td>
+                    <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;" 
+                            onclick="loadAndShowJson(${t.id})">View JSON</button>
+                </td>
+            </tr>`;
+        });
+        
+        html += '</table>';
+        tableOutput.innerHTML = html;
+    } catch (error) {
+        tableOutput.innerHTML = `<p style="color: #ef4444;">❌ Error: ${error.message}</p>`;
+    }
+}
+
+// 6. View Template Content
+async function viewTemplateContent() {
+    const templateId = document.getElementById('viewTemplateId').value;
+    
+    if (!templateId) {
+        alert('Please enter a template ID');
+        return;
+    }
+    
+    loadAndShowJson(templateId);
+}
+
+function loadAndShowJson(templateId) {
+    const contentOutput = document.getElementById('contentOutput');
+    contentOutput.innerHTML = '<p>Loading...</p>';
+    
+    fetch(`${API_BASE}${templateId}/`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                contentOutput.innerHTML = `<p style="color: #ef4444;">❌ Error: ${data.error}</p>`;
+                return;
+            }
+            
+            const jsonStr = JSON.stringify(data.json, null, 2);
+            contentOutput.innerHTML = `
+                <h3>Template: ${data.name} (ID: ${data.id})</h3>
+                <div class="json-display">${escapeHtml(jsonStr)}</div>
+            `;
+        })
+        .catch(err => {
+            contentOutput.innerHTML = `<p style="color: #ef4444;">❌ Error: ${err.message}</p>`;
+        });
+}
+
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+// Auto-load on page load
+window.addEventListener('load', () => {
+    log('savedOutput', '✅ Debug console ready. Click buttons to test.', 'success');
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>Edit User Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+body{
+    margin:0;
+    background:linear-gradient(135deg,#f5fbf8 0%,#eef7f3 100%);
+    color:#0f172a;
+    font-family:'Poppins',sans-serif;
+    display:flex;
+    min-height:100vh;
+}
+
+/* Sidebar */
+.sidebar{
+    width:260px;
+    background:linear-gradient(180deg,#0f172a 0%,#064e3b 55%,#047857 100%);
+    padding:25px 20px;
+    border-right:1px solid rgba(255,255,255,.08);
+    box-shadow:6px 0 24px rgba(4,120,87,0.18);
+}
+
+.sidebar h2{
+    text-align:center;
+    color:#ffffff;
+    margin-bottom:30px;
+    letter-spacing:.4px;
+}
+
+.sidebar a{
+    display:block;
+    padding:12px 12px;
+    margin-bottom:10px;
+    color:#cbd5e1;
+    text-decoration:none;
+    border-radius:12px;
+    transition:.25s ease;
+    border:1px solid transparent;
+}
+
+.sidebar a:hover{
+    background:linear-gradient(135deg,#10b981,#06b6d4);
+    border-color:rgba(255,255,255,0.08);
+    box-shadow:0 10px 26px rgba(16,185,129,0.26);
+    color:#ffffff;
+    transform:translateX(4px);
+}
+
+/* main panel */
+.main{
+    flex:1;
+    padding:32px 40px;
+}
+
+.panel{
+    background:#ffffff;
+    padding:22px;
+    border-radius:18px;
+    border:1px solid #e2e8f0;
+    box-shadow:0 12px 28px rgba(15,23,42,0.1);
+}
+
+.option{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 12px;
+    margin-bottom:12px;
+    background:#f8fafc;
+    border-radius:12px;
+    border:1px solid #e2e8f0;
+    color:#0f172a;
+}
+
+button{
+    padding:12px 14px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(135deg,#10b981,#06b6d4);
+    color:white;
+    cursor:pointer;
+    font-weight:700;
+    letter-spacing:.2px;
+    box-shadow:0 10px 22px rgba(16,185,129,0.2);
+    transition:.2s ease;
+}
+
+button:hover{
+    transform:translateY(-1px);
+    box-shadow:0 12px 26px rgba(16,185,129,0.28);
+}
+
+input[type=checkbox]{
+    width:20px;
+    height:20px;
+    cursor:pointer;
+    accent-color:#10b981;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+
+    <h2>ADMIN PANEL</h2>
+
+    <a href="{% url 'admin_dashboard' %}"><i class="fa-solid fa-house"></i> Dashboard</a>
+    <a href="{% url 'admin_profile' %}"><i class="fa-solid fa-user-tie"></i> Admin Profile</a>
+    <a href="{% url 'manage_users' %}"><i class="fa-solid fa-users"></i> Manage Users</a>
+    <a href="{% url 'template_admin' %}"><i class="fa-solid fa-palette"></i> ID Templates</a>
+    <a href="{% url 'generate_id_card' %}"><i class="fa-solid fa-id-card"></i> Generate ID Card</a>
+    <a href="{% url 'dashboard_settings' %}"><i class="fa-solid fa-gear"></i> Edit User Dashboard</a>
+
+    <a href="{% url 'logout' %}" style="background:#ef4444;margin-top:35px;text-align:center;">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+    </a>
+
+</div>
+
+<!-- Main -->
+<div class="main">
+
+    <h1>Edit User Dashboard</h1>
+    <p style="color:#94a3b8">Choose what information users can see in their dashboard.</p>
+
+    <div class="panel">
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,.1);">
+                <h3 style="color: #38bdf8; font-size: 14px; margin-bottom: 12px;">📋 Personal Information</h3>
+                
+                <div class="option">
+                    <span>Show Profile Photo</span>
+                    <input type="checkbox" name="show_photo" {% if settings.show_photo %}checked{% endif %}>
+                </div>
+
+                <div class="option">
+                    <span>Show Role/Position</span>
+                    <input type="checkbox" name="show_role" {% if settings.show_role %}checked{% endif %}>
+                </div>
+
+                <div class="option">
+                    <span>Show Date of Birth</span>
+                    <input type="checkbox" name="show_date_of_birth" {% if settings.show_date_of_birth %}checked{% endif %}>
+                </div>
+
+                <div class="option">
+                    <span>Show Age</span>
+                    <input type="checkbox" name="show_age" {% if settings.show_age %}checked{% endif %}>
+                </div>
+
+                <div class="option">
+                    <span>Show Blood Group</span>
+                    <input type="checkbox" name="show_blood_group" {% if settings.show_blood_group %}checked{% endif %}>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,.1);">
+                <h3 style="color: #38bdf8; font-size: 14px; margin-bottom: 12px;">📞 Contact Information</h3>
+                
+                <div class="option">
+                    <span>Show Mobile Number</span>
+                    <input type="checkbox" name="show_phone" {% if settings.show_phone %}checked{% endif %}>
+                </div>
+
+                <div class="option">
+                    <span>Show Emergency Mobile Number</span>
+                    <input type="checkbox" name="show_emergency_mobile" {% if settings.show_emergency_mobile %}checked{% endif %}>
+                </div>
+
+                <div class="option">
+                    <span>Show Address</span>
+                    <input type="checkbox" name="show_address" {% if settings.show_address %}checked{% endif %}>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,.1);">
+                <h3 style="color: #06b6d4; font-size: 14px; margin-bottom: 12px;">🏠 Residence Information</h3>
+                
+                <div class="option">
+                    <span>Show Residence Status</span>
+                    <input type="checkbox" name="show_residence_status" {% if settings.show_residence_status %}checked{% endif %}>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,.1);">
+                <h3 style="color: #38bdf8; font-size: 14px; margin-bottom: 12px;">💼 Professional Information</h3>
+                
+                <div class="option">
+                    <span>Show Department</span>
+                    <input type="checkbox" name="show_department" {% if settings.show_department %}checked{% endif %}>
+                </div>
+
+                <div class="option">
+                    <span>Show Roll No / Employee ID</span>
+                    <input type="checkbox" name="show_roll_no" {% if settings.show_roll_no %}checked{% endif %}>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,.1);">
+                <h3 style="color: #38bdf8; font-size: 14px; margin-bottom: 12px;">🎫 ID Card Information</h3>
+                
+                <div class="option">
+                    <span>Show Valid Upto Date</span>
+                    <input type="checkbox" name="show_valid_upto" {% if settings.show_valid_upto %}checked{% endif %}>
+                </div>
+
+                <div class="option">
+                    <span>Show Signature</span>
+                    <input type="checkbox" name="show_signature" {% if settings.show_signature %}checked{% endif %}>
+                </div>
+            </div>
+
+            <button type="submit" style="width: 100%; background: #38bdf8; color: #0b1220; font-weight: 600; padding: 12px;">
+                <i class="fas fa-save"></i> Save Settings
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>

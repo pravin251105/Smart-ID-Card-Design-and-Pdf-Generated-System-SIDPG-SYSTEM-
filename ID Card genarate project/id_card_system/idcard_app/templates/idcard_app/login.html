@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | IDMS PORTAL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --primary-light: #34d399;
+            --accent: #06b6d4;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #030712;
+            --dark-2: #0a0f1a;
+            --dark-3: #111827;
+            --card-bg: rgba(17, 24, 39, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --white: #ffffff;
+        }
+
+        html, body {
+            height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--dark);
+            color: var(--white);
+            overflow: hidden;
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           MAIN LAYOUT - SPLIT SCREEN
+        ══════════════════════════════════════════════════════════════ */
+        .container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           LEFT PANEL - BRANDING SECTION
+        ══════════════════════════════════════════════════════════════ */
+        .left-panel {
+            flex: 1;
+            background: linear-gradient(145deg, #0f172a 0%, #064e3b 35%, #047857 65%, #10b981 100%);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 40px 48px;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Animated Background Elements */
+        .bg-effects {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .gradient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.5;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .gradient-orb.orb-1 {
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+            top: -150px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+
+        .gradient-orb.orb-2 {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            bottom: -100px;
+            right: -50px;
+            animation-delay: -10s;
+        }
+
+        .gradient-orb.orb-3 {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, #34d399 0%, #2dd4bf 100%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -30px) scale(1.05); }
+            50% { transform: translate(-20px, 20px) scale(0.95); }
+            75% { transform: translate(20px, 10px) scale(1.02); }
+        }
+
+        /* Grid Pattern */
+        .grid-pattern {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, black, transparent);
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: absolute;
+            inset: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            animation: particle-float 15s infinite linear;
+        }
+
+        .particle:nth-child(1) { left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { left: 25%; animation-delay: -3s; }
+        .particle:nth-child(3) { left: 40%; animation-delay: -6s; }
+        .particle:nth-child(4) { left: 55%; animation-delay: -9s; }
+        .particle:nth-child(5) { left: 70%; animation-delay: -12s; }
+        .particle:nth-child(6) { left: 85%; animation-delay: -2s; }
+
+        @keyframes particle-float {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) scale(1); opacity: 0; }
+        }
+
+        /* Brand Content */
+        .brand-content {
+            position: relative;
+            z-index: 10;
+            max-width: 540px;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 32px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            box-shadow: 0 8px 32px rgba(99, 91, 255, 0.4);
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-headline {
+            font-size: 44px;
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -1.5px;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--white) 0%, var(--gray-400) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .brand-headline span {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .brand-description {
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--gray-400);
+            margin-bottom: 28px;
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           ID CARD SHOWCASE - Animated Cards Display
+        ══════════════════════════════════════════════════════════════ */
+        .card-showcase {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            margin-top: 20px;
+            perspective: 1000px;
+        }
+
+        .floating-card {
+            position: absolute;
+            width: 320px;
+            height: 200px;
+            border-radius: 16px;
+            padding: 24px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 
+                0 25px 50px rgba(0,0,0,0.3),
+                0 0 0 1px rgba(255,255,255,0.1) inset;
+            transform-style: preserve-3d;
+            animation: floatCard 6s ease-in-out infinite;
+        }
+
+        .floating-card.card-1 {
+            left: 0;
+            top: 40px;
+            transform: rotateY(-15deg) rotateX(5deg);
+            animation-delay: 0s;
+            z-index: 3;
+        }
+
+        .floating-card.card-2 {
+            left: 120px;
+            top: 80px;
+            transform: rotateY(-10deg) rotateX(3deg);
+            animation-delay: -2s;
+            z-index: 2;
+            opacity: 0.7;
+        }
+
+        .floating-card.card-3 {
+            left: 200px;
+            top: 120px;
+            transform: rotateY(-5deg) rotateX(2deg);
+            animation-delay: -4s;
+            z-index: 1;
+            opacity: 0.4;
+        }
+
+        @keyframes floatCard {
+            0%, 100% { transform: rotateY(-15deg) rotateX(5deg) translateY(0); }
+            50% { transform: rotateY(-12deg) rotateX(8deg) translateY(-15px); }
+        }
+
+        /* Card Header */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .card-company {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .card-type {
+            font-size: 9px;
+            padding: 4px 8px;
+            background: rgba(16, 185, 129, 0.3);
+            border-radius: 4px;
+            color: var(--primary-light);
+            font-weight: 600;
+        }
+
+        /* Chip */
+        .card-chip {
+            width: 45px;
+            height: 35px;
+            background: linear-gradient(135deg, #d4af37 0%, #f4d03f 50%, #d4af37 100%);
+            border-radius: 6px;
+            position: relative;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .card-chip::before {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.4) 50%, transparent 60%);
+            animation: chipShine 3s ease-in-out infinite;
+        }
+
+        .card-chip::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30px;
+            height: 20px;
+            border: 2px solid rgba(180, 140, 50, 0.5);
+            border-radius: 3px;
+        }
+
+        .chip-lines {
+            position: absolute;
+            inset: 0;
+        }
+
+        .chip-lines::before,
+        .chip-lines::after {
+            content: '';
+            position: absolute;
+            background: rgba(180, 140, 50, 0.4);
+        }
+
+        .chip-lines::before {
+            width: 100%;
+            height: 1px;
+            top: 50%;
+        }
+
+        .chip-lines::after {
+            width: 1px;
+            height: 100%;
+            left: 50%;
+        }
+
+        @keyframes chipShine {
+            0%, 100% { opacity: 0; transform: translateX(-100%); }
+            50% { opacity: 1; transform: translateX(100%); }
+        }
+
+        /* Card Info */
+        .card-info {
+            display: flex;
+            gap: 16px;
+            align-items: flex-end;
+        }
+
+        .card-photo {
+            width: 50px;
+            height: 60px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05));
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.4);
+            font-size: 24px;
+        }
+
+        .card-details {
+            flex: 1;
+        }
+
+        .card-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .card-id {
+            font-size: 11px;
+            color: rgba(255,255,255,0.6);
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+
+        .card-dept {
+            font-size: 10px;
+            color: var(--primary-light);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* Process Steps */
+        .process-steps {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            padding: 16px 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .step:hover {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            margin: 0 auto 10px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .step-icon {
+            font-size: 20px;
+            color: var(--primary-light);
+            margin-bottom: 8px;
+        }
+
+        .step-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 4px;
+        }
+
+        .step-desc {
+            font-size: 9px;
+            color: var(--gray-500);
+            line-height: 1.4;
+        }
+
+        .step-connector {
+            position: absolute;
+            top: 28px;
+            right: -18px;
+            width: 24px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), transparent);
+        }
+
+        .step:last-child .step-connector {
+            display: none;
+        }
+
+
+
+        /* ══════════════════════════════════════════════════════════════
+           RIGHT PANEL - LOGIN FORM (MNC ENTERPRISE STYLE)
+        ══════════════════════════════════════════════════════════════ */
+        .right-panel {
+            width: 520px;
+            min-width: 520px;
+            background: linear-gradient(180deg, #0a0f1a 0%, #030712 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            position: relative;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .right-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 1px;
+            background: linear-gradient(180deg, transparent, rgba(16, 185, 129, 0.4), transparent);
+        }
+
+        /* Premium Glass Card */
+        .form-container {
+            width: 100%;
+            max-width: 420px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px 36px;
+            box-shadow: 
+                0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+                0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                0 0 80px rgba(16, 185, 129, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.5), transparent);
+        }
+
+        /* Enterprise Badge */
+        .enterprise-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--primary-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+        }
+
+        .enterprise-badge i {
+            font-size: 12px;
+        }
+
+        .form-header {
+            margin-bottom: 28px;
+        }
+
+        .form-header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--white) 0%, var(--gray-400) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-header p {
+            font-size: 14px;
+            color: var(--gray-500);
+        }
+
+        /* Role Toggle - Premium Style */
+        .role-toggle {
+            display: flex;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 24px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            color: var(--gray-500);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .role-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--white);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .role-btn i {
+            font-size: 16px;
+        }
+
+        /* Tabs */
+        .auth-tabs {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .auth-tab {
+            padding: 0 0 12px 0;
+            border: none;
+            background: transparent;
+            color: var(--gray-500);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .auth-tab.active {
+            color: var(--primary-light);
+        }
+
+        .auth-tab::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .auth-tab.active::after {
+            transform: scaleX(1);
+        }
+
+        /* Alert */
+        .alert {
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .alert-error {
+            background: rgba(255, 61, 113, 0.1);
+            border: 1px solid rgba(255, 61, 113, 0.2);
+            color: #ff6b8a;
+        }
+
+        .alert-success {
+            background: rgba(0, 214, 143, 0.1);
+            border: 1px solid rgba(0, 214, 143, 0.2);
+            color: #00d68f;
+        }
+
+        /* Form Styles */
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--gray-200);
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px 14px 44px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--white);
+            transition: all 0.3s ease;
+        }
+
+        .form-input::placeholder {
+            color: var(--gray-600);
+        }
+
+        .form-input:hover {
+            border-color: rgba(16, 185, 129, 0.3);
+            background: rgba(0, 0, 0, 0.35);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(16, 185, 129, 0.08);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-500);
+            font-size: 15px;
+            transition: color 0.3s ease;
+        }
+
+        .form-input:focus ~ .input-icon {
+            color: var(--primary-light);
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--gray-500);
+            cursor: pointer;
+            padding: 4px;
+            transition: color 0.3s ease;
+        }
+
+        .toggle-password:hover {
+            color: var(--primary-light);
+        }
+
+        /* Password Strength */
+        .password-strength {
+            margin-top: 12px;
+        }
+
+        .strength-bars {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .strength-bar {
+            flex: 1;
+            height: 4px;
+            background: var(--dark-3);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .strength-bar.weak { background: var(--danger); }
+        .strength-bar.medium { background: var(--warning); }
+        .strength-bar.strong { background: var(--success); }
+
+        .strength-text {
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+
+        .strength-text.weak { color: var(--danger); }
+        .strength-text.medium { color: var(--warning); }
+        .strength-text.strong { color: var(--success); }
+
+        /* Options Row */
+        .options-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--gray-400);
+        }
+
+        .checkbox-label input {
+            display: none;
+        }
+
+        .checkbox-custom {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-custom i {
+            font-size: 10px;
+            color: var(--white);
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-label input:checked ~ .checkbox-custom {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .checkbox-label input:checked ~ .checkbox-custom i {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .forgot-link {
+            font-size: 13px;
+            color: var(--primary-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-link:hover {
+            color: var(--accent);
+        }
+
+        /* Submit Button - Premium */
+        .submit-btn {
+            width: 100%;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, var(--primary) 0%, #059669 50%, #047857 100%);
+            border: none;
+            border-radius: 14px;
+            color: var(--white);
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 4px 15px rgba(16, 185, 129, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 30px rgba(16, 185, 129, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .submit-btn .spinner {
+            width: 22px;
+            height: 22px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            display: none;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .submit-btn.loading .btn-text { display: none; }
+        .submit-btn.loading .spinner { display: block; }
+        .submit-btn.loading i { display: none; }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+
+
+        /* Footer */
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .form-footer p {
+            font-size: 13px;
+            color: var(--gray-500);
+        }
+
+        .form-footer a {
+            color: var(--primary-light);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .form-footer a:hover {
+            color: var(--accent);
+        }
+
+        /* ══════════════════════════════════════════════════════════════
+           RESPONSIVE DESIGN
+        ══════════════════════════════════════════════════════════════ */
+        @media (max-width: 1200px) {
+            .left-panel {
+                padding: 40px;
+            }
+            .brand-headline {
+                font-size: 42px;
+            }
+            .features-grid {
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .left-panel {
+                display: none;
+            }
+            .right-panel {
+                width: 100%;
+                min-width: 100%;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .right-panel {
+                padding: 32px 24px;
+            }
+            .form-header h1 {
+                font-size: 26px;
+            }
+            .auth-tabs {
+                gap: 24px;
+            }
+            .social-btns {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ══════════════════════════════════════════════════════════════
+             LEFT PANEL - BRANDING
+        ══════════════════════════════════════════════════════════════ -->
+        <div class="left-panel">
+            <!-- Background Effects -->
+            <div class="bg-effects">
+                <div class="gradient-orb orb-1"></div>
+                <div class="gradient-orb orb-2"></div>
+                <div class="gradient-orb orb-3"></div>
+                <div class="grid-pattern"></div>
+                <div class="particles">
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                </div>
+            </div>
+
+            <!-- Brand Content -->
+            <div class="brand-content">
+                <div class="brand-logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                    <span class="logo-text">IDMS PORTAL</span>
+                </div>
+
+                <h1 class="brand-headline">
+                    Enterprise Identity<br>
+                    <span>Management Platform</span>
+                </h1>
+
+                <!-- Animated ID Card Showcase -->
+                <div class="card-showcase">
+                    <!-- Main Card -->
+                    <div class="floating-card card-1">
+                        <div class="card-header">
+                            <span class="card-company">IDMS Enterprise</span>
+                            <span class="card-type">Employee</span>
+                        </div>
+                        <div class="card-info">
+                            <div class="card-photo">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="card-details">
+                                <div class="card-name">PRAVIN V</div>
+                                <div class="card-id">EMP-23AD099</div>
+                                <div class="card-dept">Software Engineering</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Background Cards -->
+                    <div class="floating-card card-2"></div>
+                    <div class="floating-card card-3"></div>
+                </div>
+
+                <!-- Process Steps -->
+                <div class="process-steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <i class="fas fa-user-plus step-icon"></i>
+                        <div class="step-title">Register</div>
+                        <div class="step-desc">Create account</div>
+                        <div class="step-connector"></div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <i class="fas fa-upload step-icon"></i>
+                        <div class="step-title">Upload</div>
+                        <div class="step-desc">Add your photo</div>
+                        <div class="step-connector"></div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <i class="fas fa-palette step-icon"></i>
+                        <div class="step-title">Design</div>
+                        <div class="step-desc">Choose template</div>
+                        <div class="step-connector"></div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <i class="fas fa-download step-icon"></i>
+                        <div class="step-title">Download</div>
+                        <div class="step-desc">Get your ID</div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════════
+             RIGHT PANEL - LOGIN FORM
+        ══════════════════════════════════════════════════════════════ -->
+        <div class="right-panel">
+            <div class="form-container">
+                <!-- Enterprise Badge -->
+                <div class="enterprise-badge">
+                    <i class="fas fa-shield-check"></i>
+                    <span>Secure Enterprise Portal</span>
+                </div>
+
+                <!-- Header -->
+                <div class="form-header">
+                    <h1>Welcome back</h1>
+                    <p>Sign in to your enterprise account</p>
+                </div>
+
+                <!-- Role Toggle -->
+                <div class="role-toggle" id="roleToggle">
+                    <button type="button" class="role-btn active" data-role="user">
+                        <i class="fas fa-user"></i>
+                        <span>User</span>
+                    </button>
+                    <button type="button" class="role-btn" data-role="admin">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Admin</span>
+                    </button>
+                </div>
+
+                <!-- Auth Tabs -->
+                <div class="auth-tabs" id="authTabs">
+                    <button type="button" class="auth-tab active" data-tab="login">Sign In</button>
+                    <button type="button" class="auth-tab" data-tab="signup">Create Account</button>
+                </div>
+
+                <!-- Login Form -->
+                <form class="auth-form active" id="loginForm" method="POST" action="{% url 'login' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="role" id="roleInput" value="user">
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}">
+                                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+                                <span>{{ message }}</span>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <div class="input-wrapper">
+                            <input type="email" name="email" class="form-input" placeholder="Enter your email" required>
+                            <i class="input-icon fas fa-envelope"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" name="password" id="loginPassword" class="form-input" placeholder="Enter your password" required>
+                            <i class="input-icon fas fa-lock"></i>
+                            <button type="button" class="toggle-password" onclick="togglePassword('loginPassword', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="options-row">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="remember">
+                            <div class="checkbox-custom"><i class="fas fa-check"></i></div>
+                            <span>Remember me</span>
+                        </label>
+                        <a href="{% url 'forgot_password' %}" class="forgot-link">Forgot Password?</a>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <span class="btn-text">Sign In</span>
+                        <i class="fas fa-arrow-right"></i>
+                        <div class="spinner"></div>
+                    </button>
+
+                </form>
+
+                <!-- Signup Form -->
+                <form class="auth-form" id="signupForm" method="POST" action="{% url 'signup' %}">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <div class="input-wrapper">
+                            <input type="text" name="username" class="form-input" placeholder="Enter your full name" required>
+                            <i class="input-icon fas fa-user"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <div class="input-wrapper">
+                            <input type="email" name="email" class="form-input" placeholder="Enter your email" required>
+                            <i class="input-icon fas fa-envelope"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" name="password" id="signupPassword" class="form-input" placeholder="Create a password" required>
+                            <i class="input-icon fas fa-lock"></i>
+                            <button type="button" class="toggle-password" onclick="togglePassword('signupPassword', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength">
+                            <div class="strength-bars">
+                                <div class="strength-bar" id="bar1"></div>
+                                <div class="strength-bar" id="bar2"></div>
+                                <div class="strength-bar" id="bar3"></div>
+                                <div class="strength-bar" id="bar4"></div>
+                            </div>
+                            <span class="strength-text" id="strengthText">Use 8+ characters with letters, numbers & symbols</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Confirm Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" name="confirm_password" class="form-input" placeholder="Confirm your password" required>
+                            <i class="input-icon fas fa-lock"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <span class="btn-text">Create Account</span>
+                        <i class="fas fa-arrow-right"></i>
+                        <div class="spinner"></div>
+                    </button>
+                </form>
+
+                <!-- Footer -->
+                <div class="form-footer" id="formFooter">
+                    <p>Don't have an account? <a href="#" id="switchAuth">Sign up for free</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ══════════════════════════════════════════════════════════════
+        // ROLE TOGGLE
+        // ══════════════════════════════════════════════════════════════
+        const roleToggle = document.getElementById('roleToggle');
+        const roleBtns = roleToggle.querySelectorAll('.role-btn');
+        const roleInput = document.getElementById('roleInput');
+        const signupTab = document.querySelector('[data-tab="signup"]');
+        const formFooter = document.getElementById('formFooter');
+
+        roleBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                roleBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                const role = btn.dataset.role;
+                roleInput.value = role;
+                
+                if (role === 'admin') {
+                    signupTab.style.display = 'none';
+                    formFooter.style.display = 'none';
+                    switchToTab('login');
+                } else {
+                    signupTab.style.display = 'block';
+                    formFooter.style.display = 'block';
+                }
+            });
+        });
+
+        // ══════════════════════════════════════════════════════════════
+        // AUTH TABS
+        // ══════════════════════════════════════════════════════════════
+        const authTabs = document.querySelectorAll('.auth-tab');
+        const authForms = {
+            login: document.getElementById('loginForm'),
+            signup: document.getElementById('signupForm')
+        };
+
+        function switchToTab(tab) {
+            authTabs.forEach(t => t.classList.remove('active'));
+            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+            
+            Object.values(authForms).forEach(f => f.classList.remove('active'));
+            authForms[tab].classList.add('active');
+
+            const footerP = formFooter.querySelector('p');
+            if (tab === 'login') {
+                footerP.innerHTML = "Don't have an account? <a href='#' id='switchAuth'>Sign up for free</a>";
+            } else {
+                footerP.innerHTML = "Already have an account? <a href='#' id='switchAuth'>Sign in</a>";
+            }
+            
+            document.getElementById('switchAuth').onclick = (e) => {
+                e.preventDefault();
+                switchToTab(tab === 'login' ? 'signup' : 'login');
+            };
+        }
+
+        authTabs.forEach(tab => {
+            tab.addEventListener('click', () => switchToTab(tab.dataset.tab));
+        });
+
+        document.getElementById('switchAuth').onclick = (e) => {
+            e.preventDefault();
+            switchToTab('signup');
+        };
+
+        // ══════════════════════════════════════════════════════════════
+        // PASSWORD TOGGLE
+        // ══════════════════════════════════════════════════════════════
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        // ══════════════════════════════════════════════════════════════
+        // PASSWORD STRENGTH
+        // ══════════════════════════════════════════════════════════════
+        const signupPassword = document.getElementById('signupPassword');
+        const bars = [
+            document.getElementById('bar1'),
+            document.getElementById('bar2'),
+            document.getElementById('bar3'),
+            document.getElementById('bar4')
+        ];
+        const strengthText = document.getElementById('strengthText');
+
+        signupPassword.addEventListener('input', function() {
+            const pwd = this.value;
+            let score = 0;
+            
+            if (pwd.length >= 8) score++;
+            if (/[A-Z]/.test(pwd)) score++;
+            if (/[0-9]/.test(pwd)) score++;
+            if (/[^A-Za-z0-9]/.test(pwd)) score++;
+            
+            bars.forEach(bar => bar.className = 'strength-bar');
+            strengthText.className = 'strength-text';
+            
+            if (pwd.length === 0) {
+                strengthText.textContent = 'Use 8+ characters with letters, numbers & symbols';
+                return;
+            }
+            
+            const levels = {
+                1: { cls: 'weak', text: 'Weak - Add more variety' },
+                2: { cls: 'medium', text: 'Fair - Getting better' },
+                3: { cls: 'medium', text: 'Good - Almost there' },
+                4: { cls: 'strong', text: 'Strong password!' }
+            };
+            
+            const level = levels[score] || levels[1];
+            
+            for (let i = 0; i < score; i++) {
+                bars[i].classList.add(level.cls);
+            }
+            
+            strengthText.classList.add(level.cls);
+            strengthText.textContent = level.text;
+        });
+
+        // ══════════════════════════════════════════════════════════════
+        // FORM SUBMIT LOADING
+        // ══════════════════════════════════════════════════════════════
+        document.querySelectorAll('.auth-form').forEach(form => {
+            form.addEventListener('submit', function() {
+                const btn = this.querySelector('.submit-btn');
+                btn.classList.add('loading');
+            });
+        });
+    </script>
+</body>
+</html>

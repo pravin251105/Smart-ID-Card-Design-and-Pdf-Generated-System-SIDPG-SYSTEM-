@@ -1,0 +1,1689 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate ID Cards</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        :root {
+            --bg: linear-gradient(135deg, #f5fbf8 0%, #eef7f3 100%);
+            --bg-accent: none;
+            --panel: #ffffff;
+            --card: #ffffff;
+            --border: rgba(15, 23, 42, 0.08);
+            --muted: #475569;
+            --text: #0f172a;
+            --accent: #0f766e;
+            --accent-strong: #14c291;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .template-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* HEADER */
+        .header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: var(--accent-strong);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header p {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* MAIN LAYOUT */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr 400px;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* LEFT SIDEBAR - TEMPLATE & USER SELECTION */
+        .sidebar {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .sidebar h2 {
+            color: var(--accent-strong);
+            font-size: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid rgba(6, 95, 70, 0.28);
+            padding-bottom: 12px;
+        }
+
+        .sidebar h3 {
+            color: #0f172a;
+            font-size: 13px;
+            margin-top: 18px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .template-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .template-btn {
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: #f8fafc;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .template-btn:hover {
+            background: rgba(6, 95, 70, 0.06);
+            border-color: var(--accent);
+            color: var(--accent-strong);
+            transform: translateX(4px);
+        }
+
+        .template-btn.active {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+            font-weight: 600;
+            box-shadow: 0 10px 20px rgba(6, 95, 70, 0.2);
+        }
+
+        /* USER SELECTION */
+        .user-section {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-search {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: #f8fafc;
+            color: var(--text);
+            font-size: 12px;
+            margin-bottom: 10px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .user-search::placeholder {
+            color: #94a3b8;
+        }
+
+        .user-list {
+            max-height: 300px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .user-item {
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.25s;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.06);
+        }
+
+        .user-item:hover {
+            background: rgba(6, 95, 70, 0.06);
+            border-color: var(--accent);
+        }
+
+        .user-item.selected {
+            background: rgba(6, 95, 70, 0.12);
+            border-color: var(--accent);
+            font-weight: 600;
+        }
+
+        .mode-btn {
+            background: rgba(6, 95, 70, 0.08);
+            border: 1px solid rgba(6, 95, 70, 0.25);
+            color: var(--accent-strong);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-btn:hover {
+            background: rgba(56, 189, 248, 0.2);
+            border-color: #38bdf8;
+        }
+
+        .user-name {
+            flex: 1;
+        }
+
+        .user-role {
+            font-size: 10px;
+            color: #a5b4fc;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .user-item.selected .user-role {
+            background: rgba(0, 0, 0, 0.2);
+            color: #ffffff;
+        }
+
+        /* CENTER - PREVIEW */
+        .preview-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .preview-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .preview-card h3 {
+            color: var(--accent);
+            font-size: 14px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .canvas-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 280px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 2px dashed rgba(6, 95, 70, 0.25);
+            overflow: auto;
+            padding: 15px;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+            border-radius: 10px;
+            background: white;
+        }
+
+        .side-toggle {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .side-btn {
+            flex: 1;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.25s;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+
+        .side-btn:hover {
+            background: rgba(56, 189, 248, 0.12);
+            border-color: var(--accent);
+        }
+
+        .side-btn.active {
+            background: var(--accent-strong);
+            color: white;
+            border-color: var(--accent-strong);
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.35);
+        }
+
+        /* RIGHT SIDEBAR - DATA MAPPING */
+        .data-section {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .data-section h2 {
+            color: var(--accent);
+            font-size: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 12px;
+        }
+
+        .data-group {
+            margin-bottom: 18px;
+        }
+
+        .data-group label {
+            display: block;
+            font-size: 11px;
+            color: #93c5fd;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .data-value {
+            padding: 8px 10px;
+            border-radius: 8px;
+            background: rgba(6, 95, 70, 0.06);
+            border: 1px solid rgba(6, 95, 70, 0.2);
+            color: var(--text);
+            font-size: 12px;
+            word-break: break-word;
+            font-family: 'Courier New', monospace;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+        }
+
+        .data-value.placeholder {
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        /* BOTTOM ACTIONS */
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.22s ease;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            letter-spacing: 0.2px;
+        }
+
+        .btn-primary {
+            background: var(--accent-strong);
+            color: white;
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.35);
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+            box-shadow: 0 10px 24px rgba(34, 197, 94, 0.32);
+        }
+
+        .btn-success:hover {
+            background: #16a34a;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            box-shadow: 0 10px 24px rgba(239, 68, 68, 0.32);
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card);
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            padding: 30px;
+            max-width: 520px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow);
+        }
+
+        .modal-header {
+            color: #38bdf8;
+            font-size: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #38bdf8;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .modal-form input,
+        .modal-form select {
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            font-size: 12px;
+        }
+
+        .modal-form label {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(56, 189, 248, 0.3);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(56, 189, 248, 0.6);
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 280px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: var(--accent-strong);
+            opacity: 0.6;
+        }
+
+        .empty-state p {
+            font-size: 13px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1200px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar, .data-section {
+                position: relative;
+                top: 0;
+            }
+        }
+
+        .status-message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .status-message.success {
+            background: rgba(22, 163, 74, 0.08);
+            color: #166534;
+            border: 1px solid rgba(22, 163, 74, 0.35);
+            display: block;
+        }
+
+        .status-message.error {
+            background: rgba(220, 38, 38, 0.08);
+            color: #991b1b;
+            border: 1px solid rgba(220, 38, 38, 0.35);
+            display: block;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <!-- HEADER -->
+    <div class="header">
+        <h1><i class="fas fa-id-card"></i> Generate ID Cards</h1>
+        <p>Select a template and user to preview and generate professional ID cards</p>
+    </div>
+
+    <!-- STATUS MESSAGES -->
+    <div class="status-message" id="statusMsg"></div>
+
+    <!-- MAIN LAYOUT -->
+    <div class="main-layout">
+        
+        <!-- LEFT SIDEBAR - TEMPLATE SELECTION -->
+        <div class="sidebar">
+            <h2><i class="fas fa-object-group"></i> Templates</h2>
+            <div class="template-list" id="templateList">
+                <!-- Templates loaded here -->
+            </div>
+
+            <!-- USER SELECTION -->
+            <div class="user-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h3><i class="fas fa-users"></i> Select User(s)</h3>
+                    <div style="display: flex; gap: 5px;">
+                        <button id="selectAllBtn" class="mode-btn" style="padding: 4px 8px; font-size: 11px;" title="Select all users">
+                            <i class="fas fa-check-double"></i> All
+                        </button>
+                        <button id="clearAllBtn" class="mode-btn" style="padding: 4px 8px; font-size: 11px;" title="Deselect all">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                </div>
+                <input type="text" class="user-search" id="userSearch" placeholder="Search users...">
+                <div style="font-size: 10px; color: #a5b4fc; margin-top: 5px; margin-bottom: 8px;">
+                    <i class="fas fa-info-circle"></i> Click to select/deselect users | <span id="selectedCount">0</span> selected
+                </div>
+                <div class="user-list" id="userList">
+                    <!-- Users loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- CENTER - PREVIEW -->
+        <div class="preview-section">
+            <div class="preview-card">
+                <h3><i class="fas fa-eye"></i> Card Preview</h3>
+                <div class="side-toggle">
+                    <button class="side-btn active" data-side="front"><i class="fas fa-credit-card"></i> Front</button>
+                    <button class="side-btn" data-side="back"><i class="fas fa-rotate"></i> Back</button>
+                </div>
+                <div class="bg-toggle" style="margin-top: 10px; display: flex; align-items: center; gap: 8px; justify-content: center;">
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; color: #64748b;">
+                        <input type="checkbox" id="removeBgToggle" checked style="width: 16px; height: 16px; accent-color: #10b981;">
+                        <i class="fas fa-user-circle" style="color: #10b981;"></i> Remove Photo Background
+                    </label>
+                </div>
+                <div class="canvas-wrapper">
+                    <div id="emptyState" class="empty-state">
+                        <i class="fas fa-rectangle-landscape"></i>
+                        <p>Select a template and user to preview</p>
+                    </div>
+                    <canvas id="previewCanvas" style="display: none;"></canvas>
+                </div>
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="actions">
+                <button class="btn btn-primary" id="downloadBtn" disabled>
+                    <i class="fas fa-download"></i> Download PDF
+                </button>
+                <button class="btn btn-danger" id="generateAllBtn">
+                    <i class="fas fa-layer-group"></i> Generate All
+                </button>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR - DATA DISPLAY -->
+        <div class="data-section">
+            <h2><i class="fas fa-info-circle"></i> User Data</h2>
+            <div id="dataDisplay">
+                <div class="empty-state" style="min-height: 200px; font-size: 12px;">
+                    <i class="fas fa-user"></i>
+                    <p>Select a user to view data</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- MODAL FOR BULK GENERATION -->
+<div class="modal" id="bulkModal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeBulkModal()">&times;</button>
+        <div class="modal-header"><i class="fas fa-cogs"></i> Generate All IDs</div>
+        <form class="modal-form" onsubmit="handleBulkGeneration(event)">
+            <div>
+                <label>Select Template:</label>
+                <select id="bulkTemplate" required style="width: 100%;">
+                    <option value="">-- Choose Template --</option>
+                </select>
+            </div>
+            <div>
+                <label>Output Format:</label>
+                <select id="bulkFormat" required style="width: 100%;">
+                    <option value="pdf">PDF (Single File)</option>
+                    <option value="png">PNG (Zip Archive)</option>
+                    <option value="both">Both (PDF + PNG)</option>
+                </select>
+            </div>
+            <div>
+                <label>
+                    <input type="checkbox" id="includeBackSide" checked>
+                    Include Back Side
+                </label>
+            </div>
+            <button type="submit" class="btn btn-success" style="width: 100%;">
+                <i class="fas fa-rocket"></i> Generate
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+
+// IMMEDIATE TEST
+console.log('======= SCRIPT STARTING =======');
+console.log('Time:', new Date());
+console.log('Page title:', document.title);
+
+// STATE VARIABLES
+let templates = [];
+let users = [];
+let selectedTemplate = null;
+let selectedUser = null;
+let selectedUsers = [];  // For multi-select
+let currentSide = 'front';
+let removePhotoBackground = true;  // Toggle for background removal
+
+function getCSRFToken() {
+    const name = 'csrftoken=';
+    const decoded = decodeURIComponent(document.cookie || '');
+    const parts = decoded.split(';');
+    for (let p of parts) {
+        p = p.trim();
+        if (p.startsWith(name)) return p.substring(name.length);
+    }
+    return '';
+}
+
+console.log('State variables initialized');
+console.log('templates:', templates);
+console.log('users:', users);
+
+// INIT
+console.log('Script initialized, waiting for DOM...');
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('PAGE LOADED - LOADING DATA');
+    
+    // Try to load from Django context first
+    try {
+        const templatesJSON = `{{ templates_json|escapejs }}`;
+        const usersJSON = `{{ users_json|escapejs }}`;
+        
+        if (templatesJSON && templatesJSON !== '' && templatesJSON !== 'null' && !templatesJSON.includes('templates_json')) {
+            templates = JSON.parse(templatesJSON);
+            console.log('✓ Templates loaded from context:', templates.length, 'templates');
+        }
+        
+        if (usersJSON && usersJSON !== '' && usersJSON !== 'null' && !usersJSON.includes('users_json')) {
+            users = JSON.parse(usersJSON);
+            console.log('✓ Users loaded from context:', users.length, 'users');
+        }
+    } catch (e) {
+        console.warn('Could not parse context data:', e.message);
+    }
+    
+    // Initialize UI
+    setupEventListeners();
+    displayTemplates();
+    displayUsers(users);
+    populateBulkTemplates();
+    
+    // Fallback: If no data from context, fetch from API
+    if (templates.length === 0 || users.length === 0) {
+        console.log('No context data, loading from APIs...');
+        loadTemplates();
+        loadUsers();
+    }
+});
+
+// TEST API FUNCTION - CALL THIS IN BROWSER CONSOLE
+function testAPIs() {
+    console.log('Testing APIs...');
+    
+    fetch('/admin/generate-id/api/templates/')
+        .then(r => {
+            console.log('Templates API status:', r.status);
+            return r.json();
+        })
+        .then(d => console.log('Templates response:', d))
+        .catch(e => console.error('Templates error:', e));
+    
+    fetch('/admin/users/api/list/')
+        .then(r => {
+            console.log('Users API status:', r.status);
+            return r.json();
+        })
+        .then(d => console.log('Users response:', d))
+        .catch(e => console.error('Users error:', e));
+}
+
+// SETUP EVENTS
+function setupEventListeners() {
+    document.querySelectorAll('.side-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.side-btn').forEach(b => b.classList.remove('active'));
+            e.target.closest('.side-btn').classList.add('active');
+            currentSide = e.target.closest('.side-btn').dataset.side;
+            renderPreview();
+        });
+    });
+
+    // Background removal toggle
+    const bgToggle = document.getElementById('removeBgToggle');
+    if (bgToggle) {
+        bgToggle.addEventListener('change', () => {
+            if (selectedTemplate && selectedUser) {
+                showStatus('Reloading preview...', 'info');
+                renderPreview();
+            }
+        });
+    }
+
+    document.getElementById('userSearch').addEventListener('input', (e) => {
+        filterUsers(e.target.value);
+    });
+    
+    // Select All button
+    document.getElementById('selectAllBtn').addEventListener('click', () => {
+        selectedUsers = [...users];
+        displayUsers(users);
+        updateSelectedCount();
+        showStatus(`All ${users.length} users selected ✓`, 'success');
+    });
+    
+    // Clear All button
+    document.getElementById('clearAllBtn').addEventListener('click', () => {
+        selectedUsers = [];
+        selectedUser = null;
+        displayUsers(users);
+        updateButtonState();
+        document.getElementById('previewCanvas').style.display = 'none';
+        document.getElementById('emptyState').style.display = 'flex';
+        updateSelectedCount();
+        showStatus('All selections cleared', 'info');
+    });
+
+    document.getElementById('downloadBtn').addEventListener('click', downloadPDF);
+    document.getElementById('generateAllBtn').addEventListener('click', openBulkModal);
+    
+    console.log('✓ Event listeners attached to buttons');
+}
+
+// DISPLAY TEMPLATES IN UI
+function displayTemplates() {
+    const list = document.getElementById('templateList');
+    list.innerHTML = '';
+    
+    if (!templates || templates.length === 0) {
+        list.innerHTML = '<div style="color: #6b7280; font-size: 12px; padding: 10px;">No templates found</div>';
+        return;
+    }
+    
+    templates.forEach(t => {
+        const row = document.createElement('div');
+        row.className = 'template-row';
+
+        const btn = document.createElement('button');
+        btn.className = 'template-btn';
+        btn.textContent = t.name;
+        btn.onclick = function() {
+            selectTemplate(t.id, t.name, btn);
+        };
+
+        const del = document.createElement('button');
+        del.className = 'template-delete';
+        del.title = 'Delete template';
+        del.innerHTML = '<i class="fas fa-trash"></i>';
+        del.onclick = function(e) {
+            e.stopPropagation();
+            deleteTemplate(t.id);
+        };
+
+        row.appendChild(btn);
+        row.appendChild(del);
+        list.appendChild(row);
+    });
+    
+    console.log('Displayed', templates.length, 'templates');
+}
+
+// POPULATE BULK MODAL WITH TEMPLATES
+function populateBulkTemplates() {
+    const select = document.getElementById('bulkTemplate');
+    select.innerHTML = '<option value="">-- Choose Template --</option>';
+    
+    templates.forEach(t => {
+        const option = document.createElement('option');
+        option.value = t.id;
+        option.textContent = t.name;
+        select.appendChild(option);
+    });
+}
+
+// LOAD TEMPLATES FROM SERVER
+function loadTemplates() {
+    fetch('/admin/generate-id/api/templates/')
+        .then(r => r.json())
+        .then(data => {
+            templates = data.templates || [];
+            console.log('Templates loaded from API:', templates.length);
+            displayTemplates();
+            populateBulkTemplates();
+        })
+        .catch(e => console.error('Templates error:', e));
+}
+
+function deleteTemplate(id) {
+    if (!confirm('Delete this template?')) return;
+    fetch(`/admin/generate-id/api/templates/${id}/delete/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCSRFToken() }
+    })
+    .then(r => {
+        if (!r.ok) throw new Error('Delete failed');
+        return r.json();
+    })
+    .then(() => {
+        templates = templates.filter(t => t.id !== id);
+        if (selectedTemplate === id) {
+            selectedTemplate = null;
+            currentSide = 'front';
+            document.getElementById('previewCanvas').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'flex';
+        }
+        displayTemplates();
+        populateBulkTemplates();
+        showStatus('Template deleted', 'success');
+    })
+    .catch(err => {
+        console.error(err);
+        showStatus('Error deleting template', 'error');
+    });
+}
+
+// LOAD USERS
+function loadUsers() {
+    fetch('/admin/users/api/list/')
+        .then(r => r.json())
+        .then(data => {
+            // Show only real users (hide staff/admin/employee/superuser accounts)
+            const rawUsers = data.users || [];
+            users = rawUsers.filter(u => {
+                const roleText = (u.role || '').toLowerCase();
+                const isStaffFlag = u.is_staff || u.is_superuser;
+                const isStaffRole = /(staff|employee|admin|superuser)/i.test(roleText);
+                return !isStaffFlag && !isStaffRole;
+            });
+            console.log('Users loaded from API:', users.length);
+            displayUsers(users);
+        })
+        .catch(e => console.error('Users error:', e));
+}
+
+// DISPLAY USERS (with multi-select support)
+function displayUsers(userList) {
+    const userListEl = document.getElementById('userList');
+    userListEl.innerHTML = '';
+
+    if (!userList || userList.length === 0) {
+        userListEl.innerHTML = '<div style="color: #6b7280; font-size: 12px; padding: 10px;">No users found</div>';
+        return;
+    }
+
+    userList.forEach(user => {
+        const item = document.createElement('div');
+        item.className = 'user-item';
+        
+        const isSelected = selectedUsers.some(u => u.id === user.id);
+        if (isSelected) item.classList.add('selected');
+        
+        const fullName = `${user.first_name || ''} ${user.last_name || user.username}`.trim();
+        
+        item.innerHTML = `
+            <div style="flex: 1;">
+                <div class="user-name">${fullName}</div>
+                <div style="font-size: 10px; color: #6b7280; margin-top: 2px;">${user.email}</div>
+            </div>
+            <div style="text-align: right;">
+                <div class="user-role">${user.role || 'User'}</div>
+            </div>
+            <div style="margin-left: 8px; font-size: 14px; color: #38bdf8;">
+                ${isSelected ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-circle" style="opacity: 0.3;"></i>'}
+            </div>
+        `;
+        item.onclick = () => selectUser(user);
+        userListEl.appendChild(item);
+    });
+    
+    updateSelectedCount();
+}
+
+// FILTER USERS
+function filterUsers(query) {
+    const filtered = users.filter(u => {
+        const fullName = `${u.first_name || ''} ${u.last_name || u.username}`.toLowerCase();
+        return fullName.includes(query.toLowerCase()) || 
+               u.email.toLowerCase().includes(query.toLowerCase());
+    });
+    displayUsers(filtered);
+}
+
+// SELECT TEMPLATE
+async function selectTemplate(templateId, templateName, btnElement) {
+    selectedTemplate = templateId;
+    
+    // Update UI - find the button that was clicked
+    const templateButtons = document.querySelectorAll('.template-btn');
+    templateButtons.forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Mark the selected button as active
+    if (btnElement) {
+        btnElement.classList.add('active');
+    } else {
+        // Try to find it by text content
+        templateButtons.forEach(btn => {
+            if (btn.textContent === templateName) {
+                btn.classList.add('active');
+            }
+        });
+    }
+    
+    showStatus(`Template "${templateName}" selected ✓`, 'success');
+    
+    // Render preview if user is selected
+    if (selectedUsers.length === 1 || selectedUser) {
+        await renderPreview();
+    }
+}
+
+// SELECT USER (multi-select mode)
+function selectUser(user) {
+    const index = selectedUsers.findIndex(u => u.id === user.id);
+    if (index > -1) {
+        // Remove from selection
+        selectedUsers.splice(index, 1);
+    } else {
+        // Add to selection
+        selectedUsers.push(user);
+    }
+    
+    // Re-render to show selections
+    const currentSearch = document.getElementById('userSearch').value;
+    if (currentSearch) {
+        filterUsers(currentSearch);
+    } else {
+        displayUsers(users);
+    }
+    
+    // Update single preview if only 1 user selected
+    if (selectedUsers.length === 1) {
+        selectedUser = selectedUsers[0];
+        displayUserData(selectedUser);
+        if (selectedTemplate) {
+            renderPreview();
+        }
+        updateButtonState();
+    } else if (selectedUsers.length === 0) {
+        selectedUser = null;
+        document.getElementById('previewCanvas').style.display = 'none';
+        document.getElementById('emptyState').style.display = 'flex';
+        updateButtonState();
+    }
+    
+    updateSelectedCount();
+}
+
+// UPDATE BUTTON STATE
+function updateButtonState() {
+    const downloadBtn = document.getElementById('downloadBtn');
+    
+    if (selectedUsers.length === 1 && selectedTemplate) {
+        downloadBtn.disabled = false;
+    } else {
+        downloadBtn.disabled = true;
+    }
+}
+
+// UPDATE SELECTED COUNT
+function updateSelectedCount() {
+    const count = selectedUsers.length;
+    document.getElementById('selectedCount').textContent = count;
+}
+
+// RENDER PREVIEW (now without extra call at end)
+// 
+function displayUserData(user) {
+    const dataDisplay = document.getElementById('dataDisplay');
+    const fullName = `${user.first_name || ''} ${user.last_name || user.username}`.trim();
+    
+    // Determine user status badge
+    let statusBadge = 'Regular User';
+    let statusColor = '#6b7280';
+    if (user.is_superuser) {
+        statusBadge = '✓ Superuser';
+        statusColor = '#0ea5e9';
+    } else if (user.is_staff) {
+        statusBadge = '✓ Staff';
+        statusColor = '#f59e0b';
+    }
+    
+    dataDisplay.innerHTML = `
+        <div class="data-group"><label>Full Name</label><div class="data-value">${fullName || 'N/A'}</div></div>
+        <div class="data-group"><label>Email</label><div class="data-value">${user.email || 'N/A'}</div></div>
+        <div class="data-group"><label>Role</label><div class="data-value">${user.role || 'User'}</div></div>
+        <div class="data-group"><label>Status</label><div class="data-value" style="color:${statusColor};font-weight:600;">${statusBadge}</div></div>
+        <div class="data-group"><label>Department</label><div class="data-value">${user.department || 'N/A'}</div></div>
+        <div class="data-group"><label>Phone</label><div class="data-value">${user.phone || 'N/A'}</div></div>
+        <div class="data-group"><label>Emergency Phone</label><div class="data-value">${user.emergency_mobile || 'N/A'}</div></div>
+        <div class="data-group"><label>Blood Group</label><div class="data-value">${user.blood_group || 'N/A'}</div></div>
+        <div class="data-group"><label>DOB</label><div class="data-value">${user.date_of_birth || 'N/A'}</div></div>
+        <div class="data-group"><label>Age</label><div class="data-value">${user.age || 'N/A'}</div></div>
+        <div class="data-group"><label>Roll No</label><div class="data-value">${user.roll_no || 'N/A'}</div></div>
+        <div class="data-group"><label>Residence</label><div class="data-value">${user.residence_status || 'N/A'}</div></div>
+        <div class="data-group"><label>Address</label><div class="data-value">${user.address || 'N/A'}</div></div>
+        <div class="data-group"><label>Valid Upto</label><div class="data-value">${user.valid_upto || 'N/A'}</div></div>
+    `;
+}
+
+// RENDER PREVIEW
+async function renderPreview() {
+    if (!selectedTemplate || !selectedUser) {
+        document.getElementById('previewCanvas').style.display = 'none';
+        document.getElementById('emptyState').style.display = 'flex';
+        return;
+    }
+
+    try {
+        const response = await fetch(`/admin/generate-id/api/templates/${selectedTemplate}/`, {
+            credentials: 'same-origin'
+        });
+        const data = await response.json();
+        
+        if (data.error) {
+            showStatus('Error loading template: ' + data.error, 'error');
+            return;
+        }
+
+        const templateData = data.json;
+        const sideData = currentSide === 'front' ? templateData.front : templateData.back;
+
+        if (!sideData || sideData.length === 0) {
+            showStatus('This side is empty', 'error');
+            return;
+        }
+
+        // Setup canvas
+        const canvas = document.getElementById('previewCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = templateData.width || 640;
+        canvas.height = templateData.height || 400;
+        
+        // Set background
+        ctx.fillStyle = templateData.bg || '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Render template with user data (async for images)
+        await renderTemplateOnCanvas(ctx, sideData, selectedUser, canvas);
+        
+        // Show canvas, hide empty state
+        document.getElementById('emptyState').style.display = 'none';
+        canvas.style.display = 'block';
+        
+    } catch (error) {
+        showStatus('Error rendering preview: ' + error.message, 'error');
+        console.error(error);
+    }
+}
+
+// Helper to load an image and return a promise
+function loadImage(src) {
+    return new Promise((resolve, reject) => {
+        if (!src) {
+            resolve(null);
+            return;
+        }
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => resolve(null); // Resolve null on error to continue rendering
+        img.src = src;
+    });
+}
+
+// Helper function for rounded rectangles
+function roundRect(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+}
+
+// RENDER TEMPLATE ON CANVAS (async to handle images)
+async function renderTemplateOnCanvas(ctx, elements, userData, canvas) {
+    const fullName = `${userData.first_name || ''} ${userData.last_name || userData.username}`.trim();
+    const dobFmt = formatDMY(userData.date_of_birth);
+    const validFmt = formatDMY(userData.valid_upto);
+    const validYear = validFmt ? validFmt.slice(-4) : '';
+
+    function formatDMY(dateStr) {
+        if (!dateStr) return '';
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+            const [y, m, d] = parts;
+            return `${d}-${m}-${y}`;
+        }
+        return dateStr;
+    }
+
+    function wrapText(text, maxWidth, lineHeight, align = 'left') {
+        // Professional text wrapping - text stays at position, wraps DOWNWARD
+        // Split on spaces and commas for natural breaks
+        const raw = (text || '').replace(/,\s*/g, ', ');
+        const words = raw.split(/\s+/).filter(Boolean);
+        const lines = [];
+        let line = '';
+
+        const measure = (str) => ctx.measureText(str).width;
+
+        // Breaks a single long word into smaller chunks that fit maxWidth
+        function splitWord(word) {
+            const chunks = [];
+            let current = word;
+            while (measure(current) > maxWidth && current.length > 1) {
+                let cut = 1;
+                while (cut <= current.length && measure(current.slice(0, cut)) <= maxWidth) {
+                    cut++;
+                }
+                cut = Math.max(1, cut - 1);
+                chunks.push(current.slice(0, cut));
+                current = current.slice(cut);
+            }
+            if (current) chunks.push(current);
+            return chunks;
+        }
+
+        words.forEach(word => {
+            const pieces = splitWord(word);
+            pieces.forEach((piece, idx) => {
+                const testLine = line ? line + ' ' + piece : piece;
+                if (measure(testLine) > maxWidth && line) {
+                    lines.push(line);
+                    line = piece;
+                } else {
+                    line = testLine;
+                }
+            });
+        });
+
+        if (line) lines.push(line);
+
+        // Set alignment - text draws from the element's X,Y position
+        // 'left' = text starts at X position and goes right
+        // 'center' = text is centered at X position
+        // 'right' = text ends at X position
+        ctx.textBaseline = 'top';
+        
+        lines.forEach((ln, idx) => {
+            let xOffset = 0;
+            if (align === 'left') {
+                ctx.textAlign = 'left';
+                xOffset = 0; // Start exactly at element position
+            } else if (align === 'right') {
+                ctx.textAlign = 'right';
+                xOffset = 0; // End at element position
+            } else {
+                ctx.textAlign = 'center';
+                xOffset = 0; // Center at element position
+            }
+            // Each line appears BELOW the previous one
+            ctx.fillText(ln, xOffset, idx * lineHeight);
+        });
+    }
+
+    // Preload photo and signature images
+    // Check if background removal is enabled
+    const removeBg = document.getElementById('removeBgToggle')?.checked ?? true;
+    
+    let photoUrl = null;
+    if (userData.photo) {
+        if (removeBg) {
+            // Use background removal API
+            photoUrl = `/api/photo/remove-bg/${userData.id}/`;
+        } else {
+            // Use original photo
+            photoUrl = `/media/${userData.photo}`;
+        }
+    }
+    const signatureUrl = userData.signature ? `/media/${userData.signature}` : null;
+    
+    const [photoImg, signatureImg] = await Promise.all([
+        loadImage(photoUrl),
+        loadImage(signatureUrl)
+    ]);
+
+    // Use for...of to allow async operations inside loop
+    for (const el of elements) {
+        ctx.save();
+        
+        // Translate to element position
+        const x = el.x || 0;
+        const y = el.y || 0;
+        ctx.translate(x, y);
+
+        if (el.type === 'rect') {
+            ctx.fillStyle = el.fill || '#000000';
+            ctx.globalAlpha = el.opacity || 1;
+            const w = el.w || 100;
+            const h = el.h || 100;
+            ctx.fillRect(-w / 2, -h / 2, w, h);
+            ctx.globalAlpha = 1;
+        } 
+        else if (el.type === 'circle') {
+            ctx.fillStyle = el.fill || '#000000';
+            ctx.globalAlpha = el.opacity || 1;
+            const r = el.r || 50;
+            ctx.beginPath();
+            ctx.arc(0, 0, r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+        else if (el.type === 'photo') {
+            // Render user photo with background color support
+            const w = el.w || 110;
+            const h = el.h || 140;
+            const radius = el.borderRadius || 0;
+            
+            // Draw background color if set
+            if (el.bgColor && el.bgColor !== 'transparent') {
+                ctx.fillStyle = el.bgColor;
+                if (radius > 0) {
+                    roundRect(ctx, -w/2, -h/2, w, h, radius);
+                    ctx.fill();
+                } else {
+                    ctx.fillRect(-w/2, -h/2, w, h);
+                }
+            }
+            
+            if (photoImg) {
+                // Clip to rounded rect if border radius is set
+                if (radius > 0) {
+                    ctx.save();
+                    roundRect(ctx, -w/2, -h/2, w, h, radius);
+                    ctx.clip();
+                    ctx.drawImage(photoImg, -w/2, -h/2, w, h);
+                    ctx.restore();
+                } else {
+                    ctx.drawImage(photoImg, -w/2, -h/2, w, h);
+                }
+            } else {
+                // Show placeholder if no photo
+                ctx.strokeStyle = el.borderColor || '#cbd5e1';
+                ctx.setLineDash([4, 4]);
+                ctx.strokeRect(-w/2, -h/2, w, h);
+                ctx.setLineDash([]);
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('No Photo', 0, 0);
+            }
+        }
+        else if (el.type === 'signature') {
+            // Render user signature with background color support
+            const w = el.w || 120;
+            const h = el.h || 50;
+            
+            // Draw background if set
+            if (el.bgColor && el.bgColor !== 'transparent') {
+                ctx.fillStyle = el.bgColor;
+                ctx.fillRect(-w/2, -h/2, w, h);
+            }
+            
+            if (signatureImg) {
+                ctx.drawImage(signatureImg, -w/2, -h/2, w, h);
+            } else {
+                // Show placeholder if no signature
+                ctx.strokeStyle = el.borderColor || '#fbbf24';
+                ctx.setLineDash([4, 4]);
+                ctx.strokeRect(-w/2, -h/2, w, h);
+                ctx.setLineDash([]);
+                ctx.fillStyle = '#f59e0b';
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('No Signature', 0, 0);
+            }
+        }
+        else if (el.type === 'text') {
+            let text = el.text || '';
+            
+            // Replace all placeholders with user data
+            text = text.replace(/{name}/g, fullName || '{name}');
+            text = text.replace(/{email}/g, userData.email || '{email}');
+            text = text.replace(/{role}/g, userData.role || '{role}');
+            text = text.replace(/{dept}/g, userData.department || '{dept}');
+            text = text.replace(/{phone}/g, userData.phone || '{phone}');
+            text = text.replace(/{emergency}/g, userData.emergency_mobile || '{emergency}');
+            text = text.replace(/{blood}/g, userData.blood_group || '{blood}');
+            text = text.replace(/{roll_no}/g, userData.roll_no || '{roll_no}');
+            text = text.replace(/{id}/g, userData.id || '{id}');
+            text = text.replace(/{age}/g, userData.age || '{age}');
+            text = text.replace(/{dob}/g, dobFmt || '{dob}');
+            text = text.replace(/{address}/g, userData.address || '{address}');
+            text = text.replace(/{residence}/g, userData.residence_status || '{residence}');
+            text = text.replace(/{valid_upto}/g, validFmt || '{valid_upto}');
+            text = text.replace(/{valid_year}/g, validYear || '{valid_year}');
+            
+            ctx.fillStyle = el.color || '#000000';
+            ctx.globalAlpha = el.opacity || 1;
+            const fontSize = el.size || 14;
+            ctx.font = `${fontSize}px ${el.font || 'Arial'}`;
+            
+            // Smart maxWidth: prefer element setting; otherwise choose based on content.
+            // Also clamp to available space so long addresses don't spill outside the card.
+            const align = el.align || 'center';
+            const xPos = el.x || 0;
+            let maxWidth = el.maxWidth;
+            if (!maxWidth) {
+                const hasLongPlaceholder = /{address}|{residence}/.test(el.text || '');
+                if (hasLongPlaceholder) {
+                    maxWidth = canvas.width * 0.7; // give room to wrap
+                } else {
+                    maxWidth = canvas.width; // titles/logos can span wide
+                }
+            }
+
+            // Clamp to available width based on alignment and position
+            const availableWidth = (() => {
+                if (align === 'left') return Math.max(40, canvas.width - xPos);
+                if (align === 'right') return Math.max(40, xPos);
+                const half = Math.min(xPos, canvas.width - xPos);
+                return Math.max(40, half * 2);
+            })();
+            maxWidth = Math.min(maxWidth, availableWidth);
+            
+            const lineHeight = fontSize * 1.3; // Slightly more line spacing for readability
+            wrapText(text, maxWidth, lineHeight, align);
+            ctx.globalAlpha = 1;
+        }
+
+        ctx.restore();
+    }
+}
+
+// Helper: render a specific side to data URL
+async function renderSideDataURL(sideKey, templateId, user) {
+    const response = await fetch(`/admin/generate-id/api/templates/${templateId}/`, {
+        credentials: 'same-origin'
+    });
+    const data = await response.json();
+    if (data.error) throw new Error(data.error || 'Template load error');
+
+    const templateData = data.json;
+    const sideData = templateData?.[sideKey];
+    if (!sideData || sideData.length === 0) return null;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = templateData.width || 640;
+    canvas.height = templateData.height || 400;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = templateData.bg || '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    await renderTemplateOnCanvas(ctx, sideData, user, canvas);
+    return { dataUrl: canvas.toDataURL('image/png'), width: canvas.width, height: canvas.height };
+}
+
+// Helper: add front/back to one PDF page (side-by-side)
+function addSidesToPDF(doc, front, back) {
+    const PX_TO_MM = 0.264583;
+    const margin = 3; // mm
+    const gap = 4; // mm between front/back
+
+    const cardWidthMm = (front?.width || back?.width || 640) * PX_TO_MM;
+    const cardHeightMm = (front?.height || back?.height || 400) * PX_TO_MM;
+
+    const pageWidth = margin * 2 + cardWidthMm * 2 + gap;
+    const pageHeight = margin * 2 + cardHeightMm;
+
+    doc.addPage([pageWidth, pageHeight], 'landscape');
+
+    // Place front on the left, back on the right
+    if (front?.dataUrl) {
+        doc.addImage(front.dataUrl, 'PNG', margin, margin, cardWidthMm, cardHeightMm);
+    }
+    if (back?.dataUrl) {
+        const x = margin + cardWidthMm + gap;
+        doc.addImage(back.dataUrl, 'PNG', x, margin, cardWidthMm, cardHeightMm);
+    }
+}
+
+// DOWNLOAD PDF FOR SINGLE USER (front + back on one page)
+async function downloadPDF() {
+    try {
+        if (!selectedUser || !selectedTemplate) {
+            showStatus('Please select a template and user', 'error');
+            return;
+        }
+        showStatus('Generating PDF...', 'info');
+
+        const [front, back] = await Promise.all([
+            renderSideDataURL('front', selectedTemplate, selectedUser),
+            renderSideDataURL('back', selectedTemplate, selectedUser)
+        ]);
+
+        if (!front && !back) {
+            showStatus('No sides found in template', 'error');
+            return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+        // Remove the default blank page
+        doc.deletePage(1);
+        addSidesToPDF(doc, front, back);
+
+        const userName = `${selectedUser.first_name || ''} ${selectedUser.last_name || selectedUser.username}`.trim();
+        doc.save(`${userName}_ID_Card.pdf`);
+        showStatus(`✓ PDF downloaded: ${userName}_ID_Card.pdf`, 'success');
+    } catch (error) {
+        console.error('PDF generation error:', error);
+        showStatus('Error generating PDF: ' + error.message, 'error');
+    }
+}
+
+// OPEN BULK MODAL
+function openBulkModal() {
+    document.getElementById('bulkModal').classList.add('active');
+}
+
+function closeBulkModal() {
+    document.getElementById('bulkModal').classList.remove('active');
+}
+
+// BULK GENERATION - Generate PDFs for selected users
+function handleBulkGeneration(e) {
+    e.preventDefault();
+    const templateId = document.getElementById('bulkTemplate').value;
+    
+    if (!templateId) {
+        showStatus('Please select a template', 'error');
+        return;
+    }
+
+    // Use selected users, or all users if none selected
+    const usersToGenerate = selectedUsers.length > 0 ? selectedUsers : users;
+    const totalUsers = usersToGenerate.length;
+    
+    if (totalUsers === 0) {
+        showStatus('No users to generate', 'error');
+        return;
+    }
+
+    showStatus(`Generating ${totalUsers} ID card(s)...`, 'info');
+    closeBulkModal();
+
+    const includeBack = document.getElementById('includeBackSide').checked;
+
+    // Build a single PDF for all users
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    doc.deletePage(1); // remove default blank
+
+    let generated = 0;
+    let failed = 0;
+
+    const generateSequentially = async () => {
+        for (let idx = 0; idx < totalUsers; idx++) {
+            const user = usersToGenerate[idx];
+            selectedUser = user;
+            selectedTemplate = templateId;
+
+            try {
+                const [front, back] = await Promise.all([
+                    renderSideDataURL('front', templateId, user),
+                    includeBack ? renderSideDataURL('back', templateId, user) : null
+                ]);
+
+                if (!front && !back) {
+                    failed++;
+                    continue;
+                }
+
+                addSidesToPDF(doc, front, back);
+                generated++;
+                const userName = `${user.first_name || ''} ${user.last_name || user.username}`.trim();
+                showStatus(`Generating... (${generated}/${totalUsers}) ${userName}`, 'info');
+            } catch (err) {
+                failed++;
+                console.error('Error for user', user.username || user.email, ':', err);
+            }
+        }
+
+        const fileName = totalUsers === 1
+            ? `${usersToGenerate[0].first_name || ''} ${usersToGenerate[0].last_name || usersToGenerate[0].username}`.trim() + '_ID_Card.pdf'
+            : 'All_ID_Cards.pdf';
+        doc.save(fileName);
+        showStatus(`✓ Complete! Generated: ${generated}, Failed: ${failed}`, 'success');
+    };
+
+    generateSequentially();
+}
+
+// SHOW STATUS MESSAGE
+function showStatus(message, type) {
+    const msg = document.getElementById('statusMsg');
+    msg.textContent = message;
+    msg.className = `status-message ${type}`;
+    setTimeout(() => {
+        msg.className = 'status-message';
+    }, 5000);
+}
+
+// =====================================
+// API TEST FUNCTION
+// =====================================
+async function testAllAPIs() {
+    console.log('\n===== API TEST START =====\n');
+    
+    // Test 1: Test endpoint (no auth required)
+    console.log('TEST 1: /api/test/');
+    try {
+        const res1 = await fetch('/api/test/');
+        const data1 = await res1.json();
+        console.log('Status:', res1.status, 'Data:', data1);
+    } catch (e) {
+        console.error('ERROR:', e.message);
+    }
+    
+    // Test 2: Get templates
+    console.log('\nTEST 2: /admin/generate-id/api/templates/');
+    try {
+        const res2 = await fetch('/admin/generate-id/api/templates/', {credentials: 'same-origin'});
+        console.log('Status:', res2.status);
+        const text2 = await res2.text();
+        console.log('Response text:', text2.substring(0, 200));
+        const data2 = JSON.parse(text2);
+        console.log('Parsed data:', data2);
+    } catch (e) {
+        console.error('ERROR:', e.message);
+    }
+    
+    // Test 3: Get users
+    console.log('\nTEST 3: /admin/users/api/list/');
+    try {
+        const res3 = await fetch('/admin/users/api/list/', {credentials: 'same-origin'});
+        console.log('Status:', res3.status);
+        const text3 = await res3.text();
+        console.log('Response text:', text3.substring(0, 200));
+        const data3 = JSON.parse(text3);
+        console.log('Parsed data:', data3);
+    } catch (e) {
+        console.error('ERROR:', e.message);
+    }
+    
+    console.log('\n===== API TEST END =====\n');
+    alert('Check browser console (F12) for test results');
+}
+
+</script>
+
+</body>
+
+</html>

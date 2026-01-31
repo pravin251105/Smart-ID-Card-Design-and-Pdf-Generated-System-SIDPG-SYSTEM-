@@ -1,0 +1,682 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit User Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0e27 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 40px;
+            text-align: center;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header h1 {
+            font-size: 32px;
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #a5b4fc;
+            font-size: 14px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.7));
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-grid.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            color: #38bdf8;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-group label i {
+            font-size: 14px;
+            color: #0ea5e9;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px 15px;
+            border: 2px solid rgba(56, 189, 248, 0.2);
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.6);
+            color: #e0e7ff;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input::placeholder,
+        .form-group select::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            background: rgba(56, 189, 248, 0.1);
+            border-color: #00d4ff;
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .photo-section {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(6, 182, 212, 0.05));
+            border: 2px dashed rgba(56, 189, 248, 0.4);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            grid-column: 1 / -1;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .photo-section:hover {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(6, 182, 212, 0.1));
+            border-color: rgba(56, 189, 248, 0.6);
+        }
+
+        .photo-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .photo-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .photo-item-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #93c5fd;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .photo-preview {
+            width: 140px;
+            height: 140px;
+            border-radius: 12px;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 3px solid rgba(56, 189, 248, 0.4);
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .photo-preview:hover {
+            border-color: #00d4ff;
+            transform: scale(1.02);
+        }
+
+        .photo-upload-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+            color: #0b1220;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .photo-upload-label:hover {
+            background: linear-gradient(135deg, #0ea5e9, #00d4ff);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(56, 189, 248, 0.4);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #38bdf8;
+            margin-top: 35px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(56, 189, 248, 0.3);
+            grid-column: 1 / -1;
+        }
+
+        .section-header i {
+            font-size: 22px;
+            color: #0ea5e9;
+        }
+
+        .status-message {
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideDown 0.3s ease-out;
+            grid-column: 1 / -1;
+        }
+
+        .status-message.success {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+
+        .status-message.error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            grid-column: 1 / -1;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+            color: #0b1220;
+            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0ea5e9, #00d4ff);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(56, 189, 248, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(56, 189, 248, 0.1);
+            color: #38bdf8;
+            border: 2px solid rgba(56, 189, 248, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(56, 189, 248, 0.2);
+            border-color: #38bdf8;
+            transform: translateY(-3px);
+        }
+
+        .password-note {
+            color: #9ca3af;
+            font-size: 12px;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hidden-field {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .photo-container {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- HEADER -->
+    <div class="header">
+        <h1>
+            <i class="fas fa-user-edit"></i> Edit User Profile
+        </h1>
+        <p>Update user information and manage settings</p>
+    </div>
+
+    <!-- MAIN CARD -->
+    <div class="card">
+        <form id="editForm" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- STATUS MESSAGE -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="status-message success">
+                        <i class="fas fa-check-circle"></i> {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            <div id="statusMsg" class="status-message" style="display: none;"></div>
+
+            <!-- USER ID DISPLAY -->
+            <div class="section-header">
+                <i class="fas fa-id-card"></i> User ID
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label><i class="fas fa-hashtag"></i> ID</label>
+                    <input type="text" value="{{ user.id }}" disabled style="background: rgba(56, 189, 248, 0.05); cursor: not-allowed;">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-calendar"></i> Joined</label>
+                    <input type="text" value="{{ user.date_joined|date:'d M, Y' }}" disabled style="background: rgba(56, 189, 248, 0.05); cursor: not-allowed;">
+                </div>
+            </div>
+
+            <!-- PHOTO & SIGNATURE UPLOAD -->
+            {% if settings and settings.show_photo %}
+            <div class="photo-section">
+                <div class="section-header" style="margin: 0 0 25px 0; border-bottom: none;">
+                    <i class="fas fa-image"></i> Photo & Signature
+                </div>
+                <div class="photo-container">
+                    <!-- Photo -->
+                    <div class="photo-item">
+                        <div class="photo-item-title">Profile Photo</div>
+                        {% if user.photo %}
+                            <img id="photoPreview" src="{{ user.photo.url }}" alt="Photo" class="photo-preview">
+                        {% else %}
+                            <div style="width: 140px; height: 140px; border-radius: 12px; background: rgba(56, 189, 248, 0.1); border: 2px dashed rgba(56, 189, 248, 0.4); display: flex; align-items: center; justify-content: center; margin-bottom: 15px;">
+                                <i class="fas fa-image" style="font-size: 40px; color: rgba(56, 189, 248, 0.4);"></i>
+                            </div>
+                        {% endif %}
+                        <label class="photo-upload-label" for="photoInput">
+                            <i class="fas fa-cloud-upload-alt"></i> Upload Photo
+                        </label>
+                        <input type="file" id="photoInput" name="photo" accept="image/*" onchange="previewPhoto(event)">
+                    </div>
+
+                    <!-- Signature -->
+                    {% if settings.show_signature %}
+                    <div class="photo-item">
+                        <div class="photo-item-title">Signature</div>
+                        {% if user.signature %}
+                            <img id="signaturePreview" src="{{ user.signature.url }}" alt="Signature" class="photo-preview">
+                        {% else %}
+                            <div style="width: 140px; height: 140px; border-radius: 12px; background: rgba(56, 189, 248, 0.1); border: 2px dashed rgba(56, 189, 248, 0.4); display: flex; align-items: center; justify-content: center; margin-bottom: 15px;">
+                                <i class="fas fa-pen-fancy" style="font-size: 40px; color: rgba(56, 189, 248, 0.4);"></i>
+                            </div>
+                        {% endif %}
+                        <label class="photo-upload-label" for="signatureInput">
+                            <i class="fas fa-cloud-upload-alt"></i> Upload Signature
+                        </label>
+                        <input type="file" id="signatureInput" name="signature" accept="image/*" onchange="previewSignature(event)">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- BASIC INFORMATION -->
+            <div class="section-header">
+                <i class="fas fa-user"></i> Basic Information
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label><i class="fas fa-at"></i> Username</label>
+                    <input type="text" name="username" value="{{ user.username }}" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email</label>
+                    <input type="email" name="email" value="{{ user.email }}" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-address-card"></i> First Name</label>
+                    <input type="text" name="first_name" value="{{ user.first_name|default:'' }}" placeholder="John">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-address-card"></i> Last Name</label>
+                    <input type="text" name="last_name" value="{{ user.last_name|default:'' }}" placeholder="Doe">
+                </div>
+            </div>
+
+            <!-- PERSONAL INFORMATION -->
+            {% if settings and (settings.show_role or settings.show_date_of_birth or settings.show_age or settings.show_blood_group) %}
+            <div class="section-header">
+                <i class="fas fa-user-tie"></i> Personal Information
+            </div>
+            <div class="form-grid">
+                {% if settings.show_role %}
+                <div class="form-group">
+                    <label><i class="fas fa-crown"></i> Role</label>
+                    <select name="role">
+                        <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                        <option value="student" {% if user.role == 'student' %}selected{% endif %}>Student</option>
+                        <option value="staff" {% if user.role == 'staff' %}selected{% endif %}>Staff</option>
+                        <option value="employee" {% if user.role == 'employee' %}selected{% endif %}>Employee</option>
+                        <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
+                    </select>
+                </div>
+                {% endif %}
+                
+                {% if settings.show_date_of_birth %}
+                <div class="form-group">
+                    <label><i class="fas fa-birthday-cake"></i> Date of Birth</label>
+                    <input type="date" name="date_of_birth" value="{{ user.date_of_birth|date:'Y-m-d'|default:'' }}">
+                </div>
+                {% endif %}
+
+                {% if settings.show_age %}
+                <div class="form-group">
+                    <label><i class="fas fa-calendar-alt"></i> Age</label>
+                    <input type="number" name="age" value="{{ user.age|default:'' }}" min="1" max="150" placeholder="25">
+                </div>
+                {% endif %}
+
+                {% if settings.show_blood_group %}
+                <div class="form-group">
+                    <label><i class="fas fa-droplet"></i> Blood Group</label>
+                    <select name="blood_group">
+                        <option value="">Select Blood Group</option>
+                        <option value="A+" {% if user.blood_group == 'A+' %}selected{% endif %}>A+</option>
+                        <option value="A-" {% if user.blood_group == 'A-' %}selected{% endif %}>A-</option>
+                        <option value="B+" {% if user.blood_group == 'B+' %}selected{% endif %}>B+</option>
+                        <option value="B-" {% if user.blood_group == 'B-' %}selected{% endif %}>B-</option>
+                        <option value="AB+" {% if user.blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+                        <option value="AB-" {% if user.blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+                        <option value="O+" {% if user.blood_group == 'O+' %}selected{% endif %}>O+</option>
+                        <option value="O-" {% if user.blood_group == 'O-' %}selected{% endif %}>O-</option>
+                    </select>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- CONTACT INFORMATION -->
+            {% if settings and (settings.show_phone or settings.show_emergency_mobile or settings.show_address) %}
+            <div class="section-header">
+                <i class="fas fa-phone"></i> Contact Information
+            </div>
+            <div class="form-grid">
+                {% if settings.show_phone %}
+                <div class="form-group">
+                    <label><i class="fas fa-mobile-alt"></i> Mobile Number</label>
+                    <input type="tel" name="phone" value="{{ user.phone|default:'' }}" placeholder="+1 (555) 000-0000">
+                </div>
+                {% endif %}
+
+                {% if settings.show_emergency_mobile %}
+                <div class="form-group">
+                    <label><i class="fas fa-phone-slash"></i> Emergency Mobile</label>
+                    <input type="tel" name="emergency_mobile" value="{{ user.emergency_mobile|default:'' }}" placeholder="+1 (555) 000-0000">
+                </div>
+                {% endif %}
+            </div>
+
+            {% if settings.show_address %}
+            <div class="form-group full">
+                <label><i class="fas fa-map-marker-alt"></i> Address</label>
+                <textarea name="address" placeholder="Street address, city, state, zip code...">{{ user.address|default:'' }}</textarea>
+            </div>
+            {% endif %}
+            {% endif %}
+
+            <!-- PROFESSIONAL INFORMATION -->
+            <div class="section-header">
+                <i class="fas fa-briefcase"></i> Professional Information
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label><i class="fas fa-building"></i> Department</label>
+                    <input type="text" name="department" value="{{ user.department|default:'' }}" placeholder="e.g., Engineering, HR, Sales">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-id-badge"></i> Roll No / Employee ID</label>
+                    <input type="text" name="roll_no" value="{{ user.roll_no|default:'' }}" placeholder="e.g., 12345678">
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label><i class="fas fa-home"></i> Residence Status</label>
+                    <select name="residence_status">
+                        <option value="">-- Select Status --</option>
+                        <option value="resident" {% if user.residence_status == 'resident' %}selected{% endif %}>Resident</option>
+                        <option value="non-resident" {% if user.residence_status == 'non-resident' %}selected{% endif %}>Non-Resident</option>
+                        <option value="temporary" {% if user.residence_status == 'temporary' %}selected{% endif %}>Temporary</option>
+                        <option value="international" {% if user.residence_status == 'international' %}selected{% endif %}>International</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- ID CARD INFORMATION -->
+            {% if settings and settings.show_valid_upto %}
+            <div class="section-header">
+                <i class="fas fa-credit-card"></i> ID Card Information
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label><i class="fas fa-calendar-check"></i> Valid Upto</label>
+                    <input type="date" name="valid_upto" value="{{ user.valid_upto|date:'Y-m-d'|default:'' }}">
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- SECURITY -->
+            <div class="section-header">
+                <i class="fas fa-lock"></i> Security
+            </div>
+            <div class="form-grid">
+                <div class="form-group full">
+                    <label><i class="fas fa-key"></i> Change Password</label>
+                    <input type="password" name="new_password" id="password" placeholder="Leave blank to keep current password">
+                    <div class="password-note">
+                        <i class="fas fa-info-circle"></i> Minimum 8 characters required
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="button-group">
+                <a href="{% url 'manage_users' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function previewPhoto(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                let preview = document.getElementById('photoPreview');
+                if (!preview) {
+                    preview = document.createElement('img');
+                    preview.id = 'photoPreview';
+                    preview.className = 'photo-preview';
+                    document.querySelector('.photo-item:nth-child(1)').insertBefore(preview, document.querySelector('.photo-item:nth-child(1) .photo-item-title').nextElementSibling);
+                }
+                preview.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function previewSignature(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                let preview = document.getElementById('signaturePreview');
+                if (!preview) {
+                    preview = document.createElement('img');
+                    preview.id = 'signaturePreview';
+                    preview.className = 'photo-preview';
+                    const items = document.querySelectorAll('.photo-item');
+                    if (items.length > 1) {
+                        items[1].insertBefore(preview, items[1].querySelector('.photo-item-title').nextElementSibling);
+                    }
+                }
+                preview.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    document.getElementById('editForm').addEventListener('submit', function(e) {
+        const password = document.getElementById('password').value;
+        if (password && password.length < 8) {
+            e.preventDefault();
+            showStatus('Password must be at least 8 characters', 'error');
+            return false;
+        }
+    });
+
+    function showStatus(message, type) {
+        const msg = document.getElementById('statusMsg');
+        msg.textContent = message;
+        msg.className = `status-message ${type}`;
+        msg.style.display = 'flex';
+    }
+</script>
+
+</body>
+</html>
